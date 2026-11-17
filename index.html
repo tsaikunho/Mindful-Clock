@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心靈澄時 Mindful Clock</title>
+
+  <style>
+    /* =========================
+       1. 全域設定
+    ========================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, #fff8e8, transparent 35%),
+        linear-gradient(135deg, #e9e3d8, #d8ded9, #e8ddd0);
+      color: #514c43;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 35px 16px;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* =========================
+       2. 主容器
+    ========================= */
+    .container {
+      width: 100%;
+      max-width: 920px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 30px;
+      padding: 35px;
+      box-shadow: 0 20px 60px rgba(75, 68, 55, 0.12);
+      backdrop-filter: blur(15px);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 30px;
+      letter-spacing: 5px;
+      font-weight: 500;
+      color: #75644e;
+    }
+
+    header p {
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #a39885;
+      margin-top: 8px;
+    }
+
+    /* =========================
+       3. 時鐘區域
+    ========================= */
+    .clock-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #clock {
+      width: min(78vw, 340px);
+      height: min(78vw, 340px);
+      border-radius: 50%;
+      position: relative;
+      background: linear-gradient(145deg, #fffdf5, #eee6d7);
+      border: 8px solid #fffaf0;
+      box-shadow:
+        12px 12px 30px rgba(80, 70, 50, 0.16),
+        -8px -8px 25px rgba(255,255,255,0.9),
+        inset 0 0 15px rgba(130,110,80,0.08);
+    }
+
+    /* 時鐘內圈 */
+    #clock::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1px solid #e5d9c4;
+      border-radius: 50%;
+    }
+
+    /* 刻度 */
+    .tick {
+      position: absolute;
+      width: 2px;
+      height: 8px;
+      background: #c6b79d;
+      top: 7px;
+      left: 50%;
+      transform-origin: 0 154px;
+      border-radius: 2px;
+    }
+
+    .tick.major {
+      width: 3px;
+      height: 14px;
+      background: #9b8564;
+    }
+
+    /* 數字 */
+    .number {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 19px;
+      font-family: Georgia, serif;
+      color: #88765b;
+      font-weight: 500;
+    }
+
+    /* 指針共同設定 */
+    .hand {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      transform-origin: center bottom;
+      transform: translateX(-50%) rotate(0deg);
+      border-radius: 10px;
+    }
+
+    #hour {
+      width: 7px;
+      height: 25%;
+      background: #8d7860;
+      z-index: 3;
+    }
+
+    #minute {
+      width: 5px;
+      height: 35%;
+      background: #b99b70;
+      z-index: 4;
+    }
+
+    #second {
+      width: 2px;
+      height: 40%;
+      background: #c77b67;
+      z-index: 5;
+    }
+
+    /* 中心圓點 */
+    .center-dot {
+      width: 14px;
+      height: 14px;
+      background: #b38c60;
+      border: 3px solid #fff8e9;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 6;
+      box-shadow: 0 1px 5px #b5a184;
+    }
+
+    /* =========================
+       4. 數位時間
+    ========================= */
+    .digital-time {
+      margin-top: 28px;
+      font-family: Georgia, serif;
+      font-size: 42px;
+      letter-spacing: 4px;
+      color: #75644e;
+    }
+
+    .date {
+      font-size: 15px;
+      color: #998c78;
+      margin-top: 8px;
+      letter-spacing: 2px;
+    }
+
+    .greeting {
+      margin-top: 18px;
+      font-size: 16px;
+      color: #9b8061;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    /* =========================
+       5. 心靈語錄
+    ========================= */
+    .quote-box {
+      margin-top: 35px;
+      padding: 28px 20px;
+      background: rgba(255,255,255,0.55);
+      border-radius: 20px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.8);
+    }
+
+    .quote-title {
+      font-size: 13px;
+      color: #a38d6d;
+      letter-spacing: 3px;
+      margin-bottom: 15px;
+    }
+
+    #quote {
+      font-size: 19px;
+      line-height: 1.9;
+      color: #74644f;
+      min-height: 60px;
+    }
+
+    .quote-source {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #a89c89;
+    }
+
+    .quote-btn {
+      margin-top: 20px;
+      border: none;
+      background: #b49a78;
+      color: white;
+      padding: 10px 25px;
+      border-radius: 30px;
+      font-size: 13px;
+      transition: 0.3s;
+    }
+
+    .quote-btn:hover {
+      background: #927655;
+      transform: translateY(-2px);
+    }
+
+    /* =========================
+       6. 專注計時器
+    ========================= */
+    .focus-box {
+      margin-top: 25px;
+      padding: 25px;
+      border-radius: 20px;
+      background: rgba(225, 219, 204, 0.45);
+      text-align: center;
+    }
+
+    .focus-box h2 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #8c785d;
+      letter-spacing: 3px;
+    }
+
+    #timer {
+      font-size: 38px;
+      font-family: Georgia, serif;
+      color: #75644e;
+      margin: 15px 0;
+    }
+
+    .timer-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .timer-buttons button {
+      padding: 9px 22px;
+      border-radius: 25px;
+      border: 1px solid #b8a78d;
+      background: transparent;
+      color: #826f54;
+      transition: 0.3s;
+    }
+
+    .timer-buttons button:hover {
+      background: #b49a78;
+      color: white;
+    }
+
+    #timer-status {
+      font-size: 13px;
+      color: #9b8c76;
+      margin-top: 15px;
+    }
+
+    /* =========================
+       7. 頁尾
+    ========================= */
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #a79a85;
+      font-size: 12px;
+      letter-spacing: 2px;
+      line-height: 2;
+    }
+
+    /* 手機版 */
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px 18px;
+      }
+
+      header h1 {
+        font-size: 24px;
+      }
+
+      .digital-time {
+        font-size: 34px;
+      }
+
+      #quote {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+
+    <header>
+      <h1>心靈澄時</h1>
+      <p>MINDFUL CLOCK · 慢一點，也沒關係</p>
+    </header>
+
+    <!-- 時鐘 -->
+    <section class="clock-area">
+
+      <div id="clock">
+        <!-- 刻度由 JavaScript 產生 -->
+        <div id="ticks"></div>
+
+        <!-- 數字由 JavaScript 產生 -->
+        <div id="numbers"></div>
+
+        <!-- 指針 -->
+        <div id="hour" class="hand"></div>
+        <div id="minute" class="hand"></div>
+        <div id="second" class="hand"></div>
+
+        <div class="center-dot"></div>
+      </div>
+
+      <!-- 數位時間 -->
+      <div id="digital" class="digital-time">00:00:00</div>
+
+      <div id="date" class="date"></div>
+
+      <div id="greeting" class="greeting">
+        願你今天平安
+      </div>
+
+    </section>
+
+    <!-- 心靈語錄 -->
+    <section class="quote-box">
+
+      <div class="quote-title">
+        ✦ 今日心語 ✦
+      </div>
+
+      <div id="quote">
+        不必急著成為更好的人，先好好成為自己。
+      </div>
+
+      <div id="quote-source" class="quote-source">
+        給正在努力的自己
+      </div>
+
+      <button class="quote-btn" id="next-quote">
+        換一句心語 ↗
+      </button>
+
+    </section>
+
+    <!-- 專注計時器 -->
+    <section class="focus-box">
+
+      <h2>✦ 專注當下 ✦</h2>
+
+      <div id="timer">25:00</div>
+
+      <div class="timer-buttons">
+        <button id="start">開始專注</button>
+        <button id="pause">暫停</button>
+        <button id="reset">重新開始</button>
+      </div>
+
+      <p id="timer-status">
+        給自己 25 分鐘，專心做好眼前的一件事。
+      </p>
+
+    </section>
+
+    <footer>
+      時間不必追趕，生命值得細細品味。<br>
+      May peace be with you.
+    </footer>
+
+  </main>
+
+  <script>
+    /* =========================
+       一、取得 HTML 元素
+    ========================= */
+
+    const hour = document.getElementById('hour')
+    const minute = document.getElementById('minute')
+    const second = document.getElementById('second')
+
+    const digital = document.getElementById('digital')
+    const dateElement = document.getElementById('date')
+    const greeting = document.getElementById('greeting')
+
+    const clock = document.getElementById('clock')
+
+
+    /* =========================
+       二、產生時鐘刻度
+    ========================= */
+
+    const ticks = document.getElementById('ticks')
+
+    for (let i = 0; i < 60; i++) {
+
+      const tick = document.createElement('div')
+
+      tick.className = i % 5 === 0
+        ? 'tick major'
+        : 'tick'
+
+      tick.style.transform = `rotate(${i * 6}deg)`
+
+      ticks.appendChild(tick)
+    }
+
+
+    /* =========================
+       三、產生時鐘數字
+    ========================= */
+
+    const numbers = document.getElementById('numbers')
+
+    for (let i = 1; i <= 12; i++) {
+
+      const number = document.createElement('div')
+
+      number.className = 'number'
+      number.textContent = i
+
+      const angle = i * 30 * Math.PI / 180
+
+      const radius = 117
+
+      const x = Math.sin(angle) * radius
+      const y = -Math.cos(angle) * radius
+
+      number.style.left = `calc(50% + ${x}px - 15px)`
+      number.style.top = `calc(50% + ${y}px - 15px)`
+
+      numbers.appendChild(number)
+    }
+
+
+    /* =========================
+       四、時鐘運作
+    ========================= */
+
+    const updateClock = () => {
+
+      const date = new Date()
+
+      const h = date.getHours()
+      const m = date.getMinutes()
+      const s = date.getSeconds()
+      const ms = date.getMilliseconds()
+
+      // 讓指針平順移動
+      const secondAngle = (s + ms / 1000) * 6
+
+      const minuteAngle = (m + s / 60) * 6
+
+      const hourAngle = ((h % 12) + m / 60) * 30
+
+      hour.style.transform =
+        `translateX(-50%) rotate(${hourAngle}deg)`
+
+      minute.style.transform =
+        `translateX(-50%) rotate(${minuteAngle}deg)`
+
+      second.style.transform =
+        `translateX(-50%) rotate(${secondAngle}deg)`
+
+
+      // 數位時間
+      digital.textContent =
+        date.toLocaleTimeString('zh-TW', {
+          hour12: false
+        })
+
+
+      // 日期
+      dateElement.textContent =
+        date.toLocaleDateString('zh-TW', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'long'
+        })
+
+
+      // 依照時間顯示問候
+      if (h < 6) {
+        greeting.textContent = '夜深了，願你有一夜好眠'
+      } else if (h < 12) {
+        greeting.textContent = '早安，願今天充滿希望'
+      } else if (h < 18) {
+        greeting.textContent = '午安，別忘了給自己一點休息'
+      } else {
+        greeting.textContent = '晚安，今天辛苦了'
+      }
+
+    }
+
+    // requestAnimationFrame 讓指針平順更新
+    const animateClock = () => {
+      updateClock()
+      requestAnimationFrame(animateClock)
+    }
+
+    animateClock()
+
+
+    /* =========================
+       五、心靈語錄
+    ========================= */
+
+    const quotes = [
+
+      {
+        text: '不必急著成為更好的人，先好好成為自己。',
+        source: '給正在努力的自己'
+      },
+
+      {
+        text: '即使今天走得很慢，也比停在原地更接近目標。',
+        source: '關於堅持'
+      },
+
+      {
+        text: '人生不是一場競賽，每個人都有自己的季節。',
+        source: '關於生命'
+      },
+
+      {
+        text: '不要為明天憂慮，因為明天自有明天的憂慮。',
+        source: '馬太福音 6:34'
+      },
+
+      {
+        text: '你不需要獨自承擔所有的重量。',
+        source: '給疲憊的心'
+      },
+
+      {
+        text: '感恩不是因為一切完美，而是在平凡中看見美好。',
+        source: '關於感恩'
+      },
+
+      {
+        text: '每一個新的早晨，都是重新開始的機會。',
+        source: '關於盼望'
+      },
+
+      {
+        text: '我留下平安給你們；我將我的平安賜給你們。',
+        source: '約翰福音 14:27'
+      },
+
+      {
+        text: '不要害怕未來，今天先踏出你能走的一步。',
+        source: '關於勇氣'
+      },
+
+      {
+        text: '安靜下來，你會發現生命中仍有許多值得感謝的事。',
+        source: '關於平安'
+      }
+
+    ]
+
+    const quote = document.getElementById('quote')
+    const quoteSource = document.getElementById('quote-source')
+    const nextQuote = document.getElementById('next-quote')
+
+    let lastQuoteIndex = -1
+
+    const showQuote = () => {
+
+      let index
+
+      do {
+        index = Math.floor(Math.random() * quotes.length)
+      } while (index === lastQuoteIndex)
+
+      lastQuoteIndex = index
+
+      quote.textContent = quotes[index].text
+      quoteSource.textContent = quotes[index].source
+
+    }
+
+    nextQuote.addEventListener('click', showQuote)
+
+
+    /* =========================
+       六、25 分鐘專注計時器
+    ========================= */
+
+    const timer = document.getElementById('timer')
+    const startBtn = document.getElementById('start')
+    const pauseBtn = document.getElementById('pause')
+    const resetBtn = document.getElementById('reset')
+    const timerStatus = document.getElementById('timer-status')
+
+    const TOTAL_TIME = 25 * 60
+
+    let remaining = TOTAL_TIME
+    let timerInterval = null
+
+    // 顯示倒數時間
+    const showTimer = () => {
+
+      const minutes = Math.floor(remaining / 60)
+      const seconds = remaining % 60
+
+      timer.textContent =
+        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+
+    }
+
+    // 開始
+    startBtn.addEventListener('click', () => {
+
+      if (timerInterval !== null || remaining <= 0) {
+        return
+      }
+
+      timerStatus.textContent = '專注當下，讓時間成為你的朋友。'
+
+      timerInterval = setInterval(() => {
+
+        remaining--
+
+        showTimer()
+
+        if (remaining <= 0) {
+
+          clearInterval(timerInterval)
+          timerInterval = null
+
+          timerStatus.textContent =
+            '恭喜完成！你已經為自己好好努力了。'
+
+        }
+
+      }, 1000)
+
+    })
+
+    // 暫停
+    pauseBtn.addEventListener('click', () => {
+
+      clearInterval(timerInterval)
+      timerInterval = null
+
+      timerStatus.textContent = '休息一下也很好，準備好再繼續。'
+
+    })
+
+    // 重新開始
+    resetBtn.addEventListener('click', () => {
+
+      clearInterval(timerInterval)
+      timerInterval = null
+
+      remaining = TOTAL_TIME
+
+      showTimer()
+
+      timerStatus.textContent =
+        '給自己 25 分鐘，專心做好眼前的一件事。'
+
+    })
+
+    // 初始顯示
+    showTimer()
+
+  </script>
+
+</body>
+</html>
